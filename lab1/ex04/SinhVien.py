@@ -6,3 +6,4 @@ class SinhVien:
         self._major = major
         self._diemTB = diemTB
         self._hocLuc = ""
+        
