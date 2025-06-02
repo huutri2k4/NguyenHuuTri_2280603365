@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, json
 from cipher.caesar import CaesarCipher
 from cipher.vigenere import VigenereCipher
 from cipher.railfence import RailFenceCipher
+from cipher.playfair import PlayfairCipher
+from cipher.transposition import TranspositionCipher
 
 app = Flask(__name__)
 
@@ -75,6 +77,69 @@ def railfence_decrypt():
     Railfence = RailFenceCipher()
     decrypted_text = Railfence.rail_fence_decrypt(text, key)
     return render_template("railfence.html",inputKeyPlain =key, inputPlainText = decrypted_text)
+
+#playfair cypher
+@app.route("/playfair")
+def playfair():
+    return render_template('playfair.html')
+
+@app.route("/playfair/creatematrix", methods=['POST'])
+def create_matrix():
+    key = request.form.get('matrixKey')
+    playfair_cipher = PlayfairCipher() 
+    matrix = playfair_cipher.create_playfair_matrix(key)
+    return render_template('playfair.html', 
+                         matrix=matrix,
+                         matrixKey=key,
+                         show_matrix=True)
+
+@app.route("/playfair/encrypt", methods=['POST'])
+def playfair_encrypt():
+    text = request.form['inputPlainText']
+    key = request.form['inputKeyPlain']
+    playfair_cipher = PlayfairCipher() 
+    matrix = playfair_cipher.create_playfair_matrix(key)
+    encrypted_text = playfair_cipher.playfair_encrypt(text, matrix)
+    return render_template("playfair.html", 
+                         inputKeyPlain=key,
+                         outputCipherText=encrypted_text,
+                         matrix=matrix,
+                         show_matrix=True)
+
+@app.route("/playfair/decrypt", methods=['POST'])
+def playfair_decrypt():
+    text = request.form['inputCipherText']
+    key = request.form['inputKeyCipher']
+    playfair_cipher = PlayfairCipher() 
+    matrix = playfair_cipher.create_playfair_matrix(key)
+    decrypted_text = playfair_cipher.playfair_decrypt(text, matrix)
+    return render_template("playfair.html",
+                         inputKeyCipher=key,
+                         outputPlainText=decrypted_text,
+                         matrix=matrix,
+                         show_matrix=True)
+
+#transposition cypher
+@app.route("/transposition")
+def transposition():
+    return render_template('transposition.html')
+
+@app.route("/transposition/encrypt", methods=['POST'])
+def transposition_encrypt():
+    text = request.form['inputPlainText']
+    key = int(request.form['inputKeyPlain'])
+    Transposition = TranspositionCipher()
+    encrypted_text = Transposition.encrypt(text, key)
+    return render_template("transposition.html",inputKeyPlain=key, outputCipherText= encrypted_text)
+
+@app.route("/transposition/decrypt", methods=['POST'])
+def transposition_decrypt():
+    text = request.form['inputCipherText']
+    key = int(request.form['inputKeyCipher'])
+    Transposition = TranspositionCipher()
+    decrypted_text = Transposition.decrypt(text, key)
+    return render_template("transposition.html",inputKeyPlain=key, outputPlainText= decrypted_text)
+
 
 #main function
 if __name__ == "__main__":
